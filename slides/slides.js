@@ -3,7 +3,7 @@
   let current=0,notesOpen=false,start=null;
   const tocButtons=slides.map((slide,i)=>{const button=document.createElement('button');button.textContent=`${String(i+1).padStart(2,'0')}  ${slide.dataset.title}`;button.onclick=()=>{go(i);toggleToc(false);};toc.append(button);return button;});
   function show(index){
-    current=Math.max(0,Math.min(slides.length-1,index));slides.forEach((slide,i)=>{slide.classList.toggle('active',i===current);slide.hidden=i!==current;slide.setAttribute('aria-hidden',String(i!==current));});
+    current=Math.max(0,Math.min(slides.length-1,index));document.body.classList.toggle('infographic-mode',slides[current].classList.contains('infographic-slide'));document.body.classList.remove('controls-visible');slides.forEach((slide,i)=>{slide.classList.toggle('active',i===current);slide.hidden=i!==current;slide.setAttribute('aria-hidden',String(i!==current));});
     counter.textContent=`${String(current+1).padStart(2,'0')} / ${slides.length}`;prev.disabled=current===0;next.disabled=current===slides.length-1;
     document.querySelector('#progress').style.width=`${(current+1)/slides.length*100}%`;notes.textContent=slides[current].dataset.notes;notes.hidden=!notesOpen;notesButton.setAttribute('aria-pressed',String(notesOpen));
     tocButtons.forEach((button,i)=>button.setAttribute('aria-current',String(i===current)));document.title=`${current+1}. ${slides[current].dataset.title} — 용사 대신 슬라임 제작기`;window.scrollTo({top:0,behavior:'instant'});
@@ -23,7 +23,7 @@
   });
   const deck=document.querySelector('#deck');deck.addEventListener('touchstart',e=>{if(e.touches.length===1&&!e.target.closest('a,button'))start={x:e.touches[0].clientX,y:e.touches[0].clientY};else start=null;},{passive:true});
   deck.addEventListener('touchend',e=>{if(!start)return;const dx=e.changedTouches[0].clientX-start.x,dy=e.changedTouches[0].clientY-start.y;if(Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.5)go(current+(dx<0?1:-1));start=null;},{passive:true});deck.addEventListener('touchcancel',()=>start=null);
-  document.addEventListener('click',e=>{if(!toc.hidden&&!e.target.closest('#toc,#tocButton'))toggleToc(false);});
+  document.addEventListener('click',e=>{if(e.target.closest('.infographic-slide'))document.body.classList.toggle('controls-visible');if(!toc.hidden&&!e.target.closest('#toc,#tocButton'))toggleToc(false);});
   const dialog=document.querySelector('#lightbox');document.querySelectorAll('[data-enlarge]').forEach(button=>button.onclick=()=>{dialog.querySelector('img').src=button.dataset.enlarge;dialog.showModal();});document.querySelector('#closeImage').onclick=()=>dialog.close();dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close();});
   window.addEventListener('beforeprint',()=>slides.forEach(s=>s.hidden=false));window.addEventListener('afterprint',()=>show(current));fromHash();
 })();
